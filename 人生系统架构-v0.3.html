@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生系统架构 v0.3</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #020617;
+      min-height: 100vh;
+      padding: 2rem;
+      color: white;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .header {
+      margin-bottom: 2rem;
+    }
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .pulse-dot {
+      width: 12px;
+      height: 12px;
+      background: #22d3ee;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      letter-spacing: -0.025em;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 0.875rem;
+      margin-left: 1.75rem;
+    }
+
+    .diagram-container {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.5rem;
+      overflow-x: auto;
+      margin-bottom: 2rem;
+    }
+
+    svg {
+      width: 100%;
+      min-width: 600px;
+      display: block;
+    }
+
+    .section {
+      background: rgba(15, 23, 42, 0.5);
+      border-radius: 1rem;
+      border: 1px solid #1e293b;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .section-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .section h2 {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .section p, .section li {
+      color: #94a3b8;
+      font-size: 0.8125rem;
+      line-height: 1.6;
+      margin-bottom: 0.5rem;
+    }
+
+    .section ul {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .section li {
+      padding-left: 1rem;
+      position: relative;
+    }
+
+    .section li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: #64748b;
+    }
+
+    .highlight-box {
+      background: rgba(30, 41, 59, 0.4);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 3px solid #22d3ee;
+    }
+
+    .highlight-box p {
+      margin: 0;
+      color: #cbd5e1;
+    }
+
+    .rule-box {
+      background: rgba(6, 78, 59, 0.2);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 3px solid #34d399;
+    }
+
+    .rule-box p {
+      margin: 0;
+      color: #cbd5e1;
+    }
+
+    .warning-box {
+      background: rgba(136, 19, 55, 0.15);
+      border-radius: 0.5rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-left: 3px solid #fb7185;
+    }
+
+    .warning-box p {
+      margin: 0;
+      color: #cbd5e1;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 1.5rem;
+      color: #475569;
+      font-size: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="pulse-dot"></div>
+        <h1>人生系统架构 v0.3</h1>
+      </div>
+      <p class="subtitle">事件驱动 · 网络式叙事 · 直觉异常 · 最小干预 · 可反复调试</p>
+    </div>
+
+    <!-- Main Diagram -->
+    <div class="diagram-container">
+      <svg viewBox="0 0 700 760">
+        <!-- Definitions -->
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b" />
+          </marker>
+          <marker id="arrowhead-cyan" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#22d3ee" />
+          </marker>
+          <marker id="arrowhead-rose" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#fb7185" />
+          </marker>
+          <marker id="arrowhead-emerald" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#34d399" />
+          </marker>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/>
+          </pattern>
+        </defs>
+
+        <!-- Background Grid -->
+        <rect width="100%" height="100%" fill="url(#grid)" />
+
+        <!-- ==================== 三角核心 ==================== -->
+        <!-- 实践 -->
+        <rect x="280" y="40" width="140" height="60" rx="8" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="350" y="65" fill="white" font-size="12" font-weight="600" text-anchor="middle">实践</text>
+        <text x="350" y="82" fill="#94a3b8" font-size="8" text-anchor="middle">就业 · 创业 · 开发 · 健康</text>
+
+        <!-- 叙事 -->
+        <rect x="80" y="280" width="140" height="60" rx="8" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="150" y="305" fill="white" font-size="12" font-weight="600" text-anchor="middle">叙事网络</text>
+        <text x="150" y="322" fill="#94a3b8" font-size="8" text-anchor="middle">方向 · 身份 · 目标</text>
+
+        <!-- 锚定 -->
+        <rect x="480" y="280" width="140" height="60" rx="8" fill="rgba(136, 19, 55, 0.25)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="550" y="305" fill="white" font-size="12" font-weight="600" text-anchor="middle">现实锚定器</text>
+        <text x="550" y="322" fill="#94a3b8" font-size="8" text-anchor="middle">身体 · 他人 · 时间</text>
+
+        <!-- 三角连线：实践 ↔ 叙事 -->
+        <line x1="280" y1="85" x2="190" y2="280" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+        <!-- 三角连线：实践 ↔ 锚定 -->
+        <line x1="420" y1="85" x2="510" y2="280" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+        <!-- 三角连线：叙事 ↔ 锚定 -->
+        <line x1="220" y1="310" x2="480" y2="310" stroke="#fbbf24" stroke-width="2" stroke-dasharray="6,3" marker-end="url(#arrowhead)" marker-start="url(#arrowhead)"/>
+
+        <!-- 中心：事件流 -->
+        <circle cx="350" cy="220" r="45" fill="rgba(251, 146, 60, 0.2)" stroke="#fb923c" stroke-width="1.5"/>
+        <text x="350" y="216" fill="#fb923c" font-size="10" font-weight="600" text-anchor="middle">事件流</text>
+        <text x="350" y="230" fill="#94a3b8" font-size="7" text-anchor="middle">三者的交互界面</text>
+
+        <!-- 中心到三角顶点的双向箭头 -->
+        <line x1="350" y1="105" x2="350" y2="170" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="350" y1="170" x2="350" y2="105" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="235" y1="265" x2="310" y2="238" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="310" y1="238" x2="235" y2="265" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="465" y1="265" x2="390" y2="238" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+        <line x1="390" y1="238" x2="465" y2="265" stroke="#fb923c" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- 张力带标注 -->
+        <text x="350" y="300" fill="#fbbf24" font-size="8" font-weight="600" text-anchor="middle">张力带</text>
+
+        <!-- ==================== 下方处理链 ==================== -->
+        <!-- 直觉异常 -->
+        <rect x="270" y="400" width="160" height="44" rx="8" fill="rgba(120, 53, 15, 0.25)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="350" y="420" fill="white" font-size="11" font-weight="600" text-anchor="middle">直觉异常</text>
+        <text x="350" y="434" fill="#94a3b8" font-size="8" text-anchor="middle">从张力带中涌现</text>
+
+        <!-- 调整器 -->
+        <rect x="270" y="480" width="160" height="44" rx="8" fill="rgba(6, 78, 59, 0.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="350" y="500" fill="white" font-size="11" font-weight="600" text-anchor="middle">调整器</text>
+        <text x="350" y="514" fill="#94a3b8" font-size="8" text-anchor="middle">行动 / 非行动 / 调试模式</text>
+
+        <!-- 调试模式 -->
+        <rect x="480" y="480" width="140" height="44" rx="8" fill="rgba(88, 28, 135, 0.3)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="550" y="500" fill="white" font-size="11" font-weight="600" text-anchor="middle">调试模式</text>
+        <text x="550" y="514" fill="#94a3b8" font-size="8" text-anchor="middle">可反复进入</text>
+
+        <!-- 半调试模式 -->
+        <rect x="80" y="480" width="140" height="44" rx="8" fill="rgba(88, 28, 135, 0.15)" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text x="150" y="500" fill="white" font-size="11" font-weight="600" text-anchor="middle">半调试模式</text>
+        <text x="150" y="514" fill="#94a3b8" font-size="8" text-anchor="middle">过渡态</text>
+
+        <!-- 三角底部到直觉异常 -->
+        <line x1="350" y1="340" x2="350" y2="400" stroke="#fbbf24" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- 直觉异常到调整器 -->
+        <line x1="350" y1="444" x2="350" y2="480" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+
+        <!-- 调整器到调试模式 -->
+        <line x1="430" y1="502" x2="480" y2="502" stroke="#a78bfa" stroke-width="1.5" marker-end="url(#arrowhead)"/>
+
+        <!-- 调整器到半调试模式 -->
+        <line x1="270" y1="502" x2="220" y2="502" stroke="#a78bfa" stroke-width="1.5" stroke-dasharray="4,2" marker-end="url(#arrowhead)"/>
+
+        <!-- 调整器回到三角 -->
+        <path d="M 270 502 L 180 502 Q 120 502 120 400 Q 120 200 260 100" fill="none" stroke="#34d399" stroke-width="1.5" marker-end="url(#arrowhead-emerald)"/>
+        <text x="140" y="490" fill="#34d399" font-size="8">回到系统</text>
+
+        <!-- ==================== Legend ==================== -->
+        <text x="520" y="420" fill="white" font-size="9" font-weight="600">图例</text>
+
+        <rect x="520" y="432" width="14" height="10" rx="2" fill="rgba(30, 41, 59, 0.5)" stroke="#94a3b8" stroke-width="1"/>
+        <text x="540" y="440" fill="#94a3b8" font-size="8">实践</text>
+
+        <rect x="520" y="448" width="14" height="10" rx="2" fill="rgba(8, 51, 68, 0.4)" stroke="#22d3ee" stroke-width="1"/>
+        <text x="540" y="456" fill="#94a3b8" font-size="8">叙事</text>
+
+        <rect x="520" y="464" width="14" height="10" rx="2" fill="rgba(136, 19, 55, 0.25)" stroke="#fb7185" stroke-width="1"/>
+        <text x="540" y="472" fill="#94a3b8" font-size="8">锚定</text>
+
+        <circle cx="527" cy="482" r="5" fill="rgba(251, 146, 60, 0.2)" stroke="#fb923c" stroke-width="1"/>
+        <text x="540" y="486" fill="#94a3b8" font-size="8">事件流</text>
+
+        <line x1="520" y1="498" x2="534" y2="498" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="4,2"/>
+        <text x="540" y="501" fill="#94a3b8" font-size="8">张力</text>
+      </svg>
+    </div>
+
+    <!-- 实践层 v0.3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #94a3b8;"></div>
+        <h2>实践层 v0.3</h2>
+      </div>
+      <p>实践层是系统的核心输入源。设计目标是低摩擦启动、高感知输出、最小维护成本。</p>
+
+      <div class="highlight-box">
+        <p><strong>实践三原则：</strong>二八定律 · 相互辅助 · 叙事驱动</p>
+      </div>
+
+      <p><strong>两种会话：</strong></p>
+      <ul>
+        <li><strong>实践会话</strong>：产生事件的主动行动。默认状态。</li>
+        <li><strong>强制休息会话</strong>：最小恢复行动。触发条件：无法感知身体、多次感知到"紧/过载/沉/钝/波动"、或叙事强行覆盖身体信号时。</li>
+      </ul>
+
+      <p><strong>感知校验流程：</strong></p>
+      <ul>
+        <li>"能感知到身体吗？" → 不能：强制休息</li>
+        <li>"信号是什么？" → 松：继续；中性：继续，标记；紧/波动：留意；麻木/过载/沉/钝：进入对应调整路径</li>
+        <li>多次感知到"紧/过载/沉/钝/波动" → 强制休息</li>
+      </ul>
+
+      <div class="warning-box">
+        <p><strong>叙事覆盖的特殊规则：</strong>脑子说"再做一点"但身体信号非"松"时，最多延迟满足一次（"再做一小段时间"）。之后必须重新校验。信号不变或加剧 → 强制休息。</p>
+      </div>
+
+      <div class="rule-box">
+        <p><strong>强制休息会话规则：</strong>持续一段时间；内容必须是低认知负荷的物理行动（洗澡、散步、躺下、进食）；禁止反思、计划、查看工作消息；结束条件：能重新感知身体，且信号未加剧。当一种形式连续无效时，必须更换形式（离开常住空间、接触自然光、与信任的人待在一起）。</p>
+      </div>
+    </div>
+
+    <!-- 叙事层 v0.3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #22d3ee;"></div>
+        <h2>叙事层 v0.3</h2>
+      </div>
+      <p>叙事层是一个动态网络，负责给事件赋予方向和评价，但不垄断裁决权。</p>
+
+      <div class="highlight-box">
+        <p><strong>核心约束：</strong>叙事必须持续接受锚定器挑战。每输出一个评价，必须同时生成一个可被锚定器证伪的预测。叙事与锚定长期一致 = 锚定器失效。</p>
+      </div>
+
+      <p><strong>叙事网络节点（含时间尺度）：</strong></p>
+      <ul>
+        <li><strong>目标节点</strong>：当下 — 这件事推进了什么可观测结果？必须绑定可观测结果 + 时间边界</li>
+        <li><strong>身份节点</strong>：近期 — 这是不是"我会做的"？定期被质疑一次</li>
+        <li><strong>方向节点</strong>：长期 — 指向影响力/生命力/联结/探索中的哪一个？长期叙事不直接干预日常决策，只在短-中期冲突时作为仲裁参考</li>
+      </ul>
+
+      <p><strong>叙事输出格式：</strong></p>
+      <ul>
+        <li>这个事件激活了哪些节点？</li>
+        <li>这个事件是否被当前网络消化？</li>
+        <li>无法消化 → 输出"异常候选"给张力带</li>
+      </ul>
+
+      <p><strong>叙事质疑清单（每个节点入网/复审时必须回答）：</strong></p>
+      <ul>
+        <li><strong>来源</strong>：这个叙事是从哪来的？外部灌输 / 模仿他人 / 情绪冲动 / 主动选择？</li>
+        <li><strong>动机</strong>：我选择它，是为了逃避什么，还是为了靠近什么？</li>
+        <li><strong>状态</strong>：它目前是在生效中、在衰减中、还是在勉强维持？最近一次支持它的事件是什么时候？</li>
+      </ul>
+
+      <p><strong>顺境锚定（好消息防护机制）：</strong></p>
+      <ul>
+        <li>当实践层产出强烈正反馈时，叙事层必须主动生成一个可被证伪的负面预测</li>
+        <li>例如：项目火了 → 预测"一周后我的身体信号是否会因维护成本而过载"</li>
+        <li>例如：获得认可 → 预测"这个认可是否会在三天后转化为新的身份焦虑"</li>
+        <li>例如：关系升温 → 预测"我是否会在一周内因为害怕失去而开始过度补偿"</li>
+      </ul>
+
+      <p><strong>逆境锚定（坏消息防护机制）：</strong></p>
+      <ul>
+        <li>当实践层产出强烈负反馈时，叙事层必须主动寻找一个<strong>未被完全摧毁的锚定点</strong></li>
+        <li>例如：项目失败 → 寻找"我是否还保有某个可迁移的能力或关系"</li>
+        <li>例如：被拒绝 → 寻找"这次拒绝是否排除了一个不适合的选项"</li>
+        <li>例如：身体崩溃 → 寻找"崩溃之前，我是否曾收到过信号但被忽略了"</li>
+        <li>逆境锚定不是强行乐观，而是阻止叙事层从"一件事失败"滑向"我整个人失败"的过度泛化</li>
+      </ul>
+
+      <div class="warning-box">
+        <p><strong>动态规则：</strong>新节点须经多个不同事件验证才入网；身份节点定期被质疑一次；目标节点必须绑定 MVA（最小可行行动）。任何新进入的长期叙事方向，必须经历 <strong>一段强制等待期</strong>。等待期内可记录思考，但不可调整方向节点；等待期后身体信号为"松"才允许进入验证流程。</p>
+      </div>
+
+      <div class="rule-box">
+        <p><strong>运行频率降级：</strong>日常行为只需实践层 + 锚定层的快速扫描，叙事分析改为回顾式（每日/每周回顾），而非每个事件都分析。</p>
+      </div>
+    </div>
+
+    <!-- 锚定层 v0.3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #fb7185;"></div>
+        <h2>锚定层 v0.3</h2>
+      </div>
+      <p>锚定器是叙事的证伪系统。它不提供意义，只提供反馈。叙事必须持续接受锚定器挑战，长期一致 = 锚定器失效。</p>
+
+      <div class="highlight-box">
+        <p><strong>锚定三通道：</strong>身体/情绪 · 他人行动 · 时间/可观测结果</p>
+      </div>
+
+      <p><strong>身体/情绪通道：</strong></p>
+      <ul>
+        <li>核心指标：<strong>紧、松、麻木、过载、沉、钝、波动</strong></li>
+        <li>不是"开心/不开心"，而是身体层面的信号地图</li>
+        <li><strong>躯体化信号</strong>：胸口闷、肩膀紧、胃抽、呼吸浅、磨牙、入睡困难——这些是情绪的身体翻译器</li>
+        <li><strong>信号与调整路径</strong>：
+          <ul>
+            <li><strong>麻木</strong> → 激活协议：等同于信号异常，触发强制休息，重点恢复身体感知</li>
+            <li><strong>过载</strong> → 降载协议：减少输入源，切断刺激，进入低认知负荷状态</li>
+            <li><strong>沉</strong> → 流动协议：引入微小物理变化（换位置、接触水、走动），打破凝固</li>
+            <li><strong>钝</strong> → 同麻木，激活协议 + 外部锚点交叉验证</li>
+            <li><strong>波动</strong> → 观察协议：不急于行动，只做最小记录，等待模式显现</li>
+          </ul>
+        </li>
+      </ul>
+
+      <p><strong>关系通道（事件驱动）：</strong></p>
+      <ul>
+        <li><strong>触发方式</strong>：不主动定时检查，只在关系事件发生后读取信号——一次冲突、一次求助、一次拒绝、一次被忽略</li>
+        <li><strong>权力/安全评估步骤</strong>：在评估"能否表达真实想法"之前，先评估表达的风险等级
+          <ul>
+            <li><strong>高风险</strong>（权力不平等、历史惩罚、情绪不稳定对象）→ 调整器输出"延迟表达"或"间接表达"，优先保护安全</li>
+            <li><strong>中风险</strong> → 选择低冲突时机，试探性表达</li>
+            <li><strong>低风险</strong> → 直接表达真实想法</li>
+          </ul>
+        </li>
+        <li><strong>亲密/家庭关系</strong>：我需要维护并获得支持的层。核心指标：事件发生后，能否表达真实想法、能否拒绝、能否求助、关系是否恢复到可流动状态</li>
+        <li><strong>职场/社会关系</strong>：基于契约和协作的层。核心指标：他人的可观测行为（主动寻求合作、取消约定、反复问同一个问题）。语言评价权重低，行动权重高</li>
+        <li><strong>关系质量锚定</strong>：不是"我有多少朋友"，而是关键关系是否处于<strong>可流动状态</strong></li>
+      </ul>
+
+      <p><strong>时间/结果通道：</strong></p>
+      <ul>
+        <li>可观测结果 + 时间边界</li>
+        <li>不是"我觉得有进展"，而是"这件事在约定时间内产生了什么可观测的变化"</li>
+      </ul>
+
+      <div class="rule-box">
+        <p><strong>锚定失效检测：</strong>如果锚定器长期与叙事输出一致，说明证伪方式可能失效。需要引入新的观测指标或调整预测精度。</p>
+      </div>
+
+      <div class="warning-box">
+        <p><strong>外部支持资源触发条件：</strong>当以下情况出现时，系统明确建议引入外部支持（医生、心理咨询、信任他人）：躯体化信号持续升级超过两周；连续多日无法达到调试模式/半调试模式的稳定感知条件；关系通道中的高风险场景反复出现且无法脱离；出现自我伤害念头或无法维持最低生活功能。</p>
+      </div>
+    </div>
+
+    <!-- 调整器 v0.3 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #fbbf24;"></div>
+        <h2>调整器 v0.3</h2>
+      </div>
+      <p>调整器是系统的最小干预单元。输入是张力带中的直觉异常，输出是：<strong>一个当下可启动的具体行动</strong> / <strong>一个有意识的非行动</strong> / <strong>进入调试模式</strong>。在重大冲击事件或身体危机时，调整器切换为<strong>调试模式</strong>。</p>
+
+      <div class="highlight-box">
+        <p><strong>核心约束：</strong>每次只输出一个结果 · 只调一层 · 当下可启动 · 最小记录、不追踪、不量化</p>
+      </div>
+
+      <p><strong>决策流程：</strong></p>
+      <ul>
+        <li>这个异常指向实践层、叙事层还是锚定层？</li>
+        <li>哪个层的改动成本最低、反馈最快？</li>
+        <li>输出一个明确结果：具体行动 / 有意识的非行动 / 进入调试模式</li>
+      </ul>
+
+      <p><strong>痛苦的处理：</strong></p>
+      <ul>
+        <li><strong>身体痛苦</strong>（累、紧、痛、麻木、过载、沉、钝）→ 回到锚定器，根据信号类型进入对应协议，可能触发强制休息</li>
+        <li><strong>心理痛苦</strong>（抗拒、恐惧、无聊）→ 不急着消除，观察它指向哪一层。是叙事在覆盖锚定，还是锚定在否定叙事？</li>
+        <li><strong>启动失败</strong>→ 把行动压缩到<strong>可笑的小</strong>，直到身体没有抗拒</li>
+        <li><strong>连续无法启动</strong>→ 不是意志力问题，是调整器选错了层，必须回溯张力带重新判断</li>
+      </ul>
+
+      <p><strong>有意识的非行动（Intentional Omission）：</strong></p>
+      <ul>
+        <li>调整器可以且应该输出"停止做"的指令</li>
+        <li>例如："在未来一段时间内，不再道歉/解释/追加任何修复行为"</li>
+        <li>例如："在对方主动联系之前，不主动发送任何消息"</li>
+        <li>例如："这个异常不处理，先观察三天"</li>
+        <li>非行动不是拖延，而是一个有边界、有期限的主动选择</li>
+      </ul>
+
+      <p><strong>调试模式（重大冲击/身体危机时启动）：</strong></p>
+      <ul>
+        <li><strong>暂停叙事</strong>：冲击期间，叙事层暂时 offline，不做任何方向性决策</li>
+        <li><strong>锚定优先</strong>：只做一件事——让身体恢复可感知状态</li>
+        <li><strong>最小维持</strong>：保留最低限度的实践（进食、睡眠、基础社交），其余全部暂停</li>
+        <li><strong>退出条件（渐进式）</strong>：
+          <ul>
+            <li>能稳定感知身体信号（即使信号不是"松"）</li>
+            <li>信号未加剧（连续多日紧/沉/钝的程度没有加深）</li>
+            <li>能启动一个最小实践（如起床、进食、短距离走动）</li>
+          </ul>
+        </li>
+        <li><strong>可反复进入</strong>：调试模式不是失败，而是系统的正常功能。可以且应该被反复进入。</li>
+      </ul>
+
+      <p><strong>半调试模式（过渡态）：</strong></p>
+      <ul>
+        <li><strong>有限叙事恢复</strong>：允许处理日常低 stakes 决策，禁止重大方向性决策</li>
+        <li><strong>渐进式实践增加</strong>：在最小维持基础上，每次只增加一个低认知负荷实践</li>
+        <li><strong>返回调试模式</strong>：如果信号加剧，随时退回调试模式，不视为倒退</li>
+      </ul>
+
+      <div class="rule-box">
+        <p><strong>不积累待办债务：</strong>上一个调整行动没做，不补做。要么重新输出一个新的，要么承认这个异常已被其他事件覆盖。系统中不存在"待完成清单"。</p>
+      </div>
+
+      <div class="warning-box">
+        <p><strong>调整器禁止行为：</strong>同时调整多个层；输出抽象意图；在没有新事件的情况下反复调整；绕过直觉异常直接"优化系统"；引入量化指标或细粒度追踪；在冲击期间强迫自己"振作起来"。</p>
+      </div>
+    </div>
+
+    <!-- 最小记录原则 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #a78bfa;"></div>
+        <h2>最小记录原则</h2>
+      </div>
+      <p>系统中允许轻量外部化记忆（如 Flomo 一句话记录），但存在严格边界：</p>
+
+      <p><strong>允许记录的内容：</strong></p>
+      <ul>
+        <li>发生了什么（一句话事件描述）</li>
+        <li>身体信号（当时感知到的信号词）</li>
+        <li>一个异常关键词（如果当时有直觉异常）</li>
+      </ul>
+
+      <p><strong>禁止记录的内容：</strong></p>
+      <ul>
+        <li>待办清单</li>
+        <li>打卡表</li>
+        <li>细粒度追踪（时间、频率、评分）</li>
+        <li>量化指标</li>
+        <li>"要做什么"或"应该做什么"</li>
+      </ul>
+
+      <div class="highlight-box">
+        <p>记录的目的是帮助跨事件验证和趋势感知，而不是制造新的待办债务。</p>
+      </div>
+    </div>
+
+    <!-- 哀悼期 / 低功耗运行期 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #fb923c;"></div>
+        <h2>哀悼期 / 低功耗运行期</h2>
+      </div>
+      <p>重大丧失（亲人离世、关系终结、核心项目失败）后，系统可能需要比调试模式更长、更宽容的恢复周期。</p>
+
+      <ul>
+        <li><strong>时间尺度</strong>：以周或月为单位，而非以天为单位</li>
+        <li><strong>叙事层</strong>：长期 offline，不质疑、不更新、不验证任何方向节点</li>
+        <li><strong>实践层</strong>：只做"维持生命和基本社会连接"的最小集合</li>
+        <li><strong>锚定层</strong>：重点观察信号是否"稳定"，而非"变好"</li>
+        <li><strong>调整器输出</strong>：以"有意识的非行动"和"半调试模式"为主</li>
+        <li><strong>退出信号</strong>：当"沉"开始偶尔被"波动"替代时，说明系统正在恢复流动性</li>
+      </ul>
+    </div>
+
+    <!-- 运转规则 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #34d399;"></div>
+        <h2>运转规则</h2>
+      </div>
+      <ul>
+        <li>事件优先：没有实践，系统不运转</li>
+        <li>打破优先：叙事必须持续接受锚定器挑战</li>
+        <li>直觉优先：异常由直觉定义，不由逻辑定义</li>
+        <li>最小干预：每次只输出一个具体行动或有意识的非行动</li>
+        <li>最小记录：允许轻量外部化记忆，禁止待办清单、打卡表、量化指标</li>
+        <li>体验为准：一切以身体信号和事件反馈为唯一准则</li>
+        <li>调试常态化：调试模式可以且应该被反复进入</li>
+      </ul>
+    </div>
+
+    <!-- 真实运行记录 -->
+    <div class="section">
+      <div class="section-header">
+        <div class="section-dot" style="background: #a78bfa;"></div>
+        <h2>真实运行记录</h2>
+      </div>
+      <p>故事板不是概念示意，而是系统在真实事件中被触发时的完整运行日志。每个场景都包含：事件输入 → 三层读取 → 调整器输出 → 实际结果反馈。</p>
+      <p><a href="人生系统架构-v0.3-故事板.html" style="color: #22d3ee; text-decoration: none;">→ 查看完整真实运行记录</a></p>
+
+      <div class="highlight-box">
+        <p><strong>核心洞见：</strong>同一个行为可以被多个层同时读取，层与层之间不是功能分区，而是同一批事件的不同观测角度。维护每一个环节，就是在维护整个系统的流动性。</p>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <p class="footer">
+      人生系统架构 v0.3 · 2026-04-15
+    </p>
+  </div>
+</body>
+</html>
